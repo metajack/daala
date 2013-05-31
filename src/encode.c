@@ -606,7 +606,7 @@ int daala_encode_img_in(daala_enc_ctx *enc, od_img *img, int duration) {
   enc->state.ref_imgi[OD_FRAME_SELF] = refi;
   memcpy(&enc->state.input, img, sizeof(enc->state.input));
   /*TODO: Incrment frame count.*/
-  if (enc->state.ref_imgi[OD_FRAME_PREV] >= 0 /*
+  if (0 && enc->state.ref_imgi[OD_FRAME_PREV] >= 0 /*
    && daala_granule_basetime(enc, enc->state.cur_time) >= 19*/) {
 #if defined(OD_DUMP_IMAGES) && defined(OD_ANIMATE)
     enc->state.ani_iter = 0;
@@ -680,8 +680,8 @@ int daala_encode_img_in(daala_enc_ctx *enc, od_img *img, int duration) {
     int w;
     int y;
     int x;
-    mbctx.is_keyframe = ( enc->state.cur_time %
-     (enc->state.info.keyframe_rate) == 0) ? 1 : 0;
+    mbctx.is_keyframe = 1;/*( enc->state.cur_time %
+                            (enc->state.info.keyframe_rate) == 0) ? 1 : 0;*/
     OD_LOG((OD_LOG_ENCODER, OD_LOG_INFO,"is_keyframe=%d",mbctx.is_keyframe ));
     nhmbs = enc->state.nhmbs;
     nvmbs = enc->state.nvmbs;
