@@ -433,6 +433,17 @@ int daala_decode_packet_in(daala_dec_ctx *dec, od_img *img,
         }
       }
     }
+    /*Level 3.*/
+    for (vy = 1; vy <= nvmvbs; vy += 2) {
+      for (vx = 1; vx <= nhmvbs; vx += 2) {
+        mvp = &grid[vy][vx];
+        if (grid[vy-1][vx-1].valid && grid[vy-1][vx+1].valid
+         && grid[vy+1][vx+1].valid && grid[vy+1][vx-1].valid) {
+          mvp->valid = od_ec_decode_bool_q15(&dec->ec, 16384);
+          if (mvp->valid) od_decode_mv(dec, mvp, mv_res, width, height);
+        }
+      }
+    }
     od_state_mc_predict(&dec->state, OD_FRAME_PREV);
   }
   frame_width = dec->state.frame_width;
