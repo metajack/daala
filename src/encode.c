@@ -631,8 +631,8 @@ int daala_encode_img_in(daala_enc_ctx *enc, od_img *img, int duration) {
           mvp = &grid[vy][vx];
           if (vy-2 >= 0 && grid[vy-2][vx].valid
            && vx-2 >= 0 && grid[vy][vx-2].valid
-           && vy+2 < height && grid[vy+2][vx].valid
-           && vx+2 < width && grid[vy][vx+2].valid) {
+           && vy+2 < nvmvbs && grid[vy+2][vx].valid
+           && vx+2 < nhmvbs && grid[vy][vx+2].valid) {
             od_ec_encode_bool_q15(&enc->ec, mvp->valid, 16384);
             if (mvp->valid) {
               od_ec_enc_uint(&enc->ec, (mvp->mv[0]) + 8*(width+32),
