@@ -682,6 +682,22 @@ int daala_encode_img_in(daala_enc_ctx *enc, od_img *img, int duration) {
           }
         }
       }
+      /*Level 4.*/
+      {int nvecs = 0;
+      for (vy = 0; vy <= nvmvbs; vy += 1) {
+        for (vx = (vy & 1) == 0; vx <= nhmvbs; vx += 2) {
+          mvp = &grid[vy][vx];
+          if (vy-1 >= 0 && grid[vy-1][vx].valid
+           && vx-1 >= 0 && grid[vy][vx-1].valid
+           && vy+1 <= nvmvbs && grid[vy+1][vx].valid
+           && vx+1 <= nhmvbs && grid[vy][vx+1].valid) {
+            od_ec_encode_bool_q15(&enc->ec, mvp->valid, 16384);
+            if (mvp->valid) od_encode_mv(enc, mvp, mv_res, width, height);
+            if (mvp->valid) nvecs++;
+          }
+        }
+      }
+      printf("frame %lld: coded %d level 4 mvs\n", enc->state.cur_time, nvecs);}
     }
     od_state_mc_predict(&enc->state, OD_FRAME_PREV);
 #if defined(OD_DUMP_IMAGES)

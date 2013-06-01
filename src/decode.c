@@ -444,6 +444,23 @@ int daala_decode_packet_in(daala_dec_ctx *dec, od_img *img,
         }
       }
     }
+    /*Level 4.*/
+    {int nvecs = 0;
+    for (vy = 0; vy <= nvmvbs; vy += 1) {
+      for (vx = (vy & 1) == 0; vx <= nhmvbs; vx += 2) {
+        mvp = &grid[vy][vx];
+        if (vy-1 >= 0 && grid[vy-1][vx].valid
+         && vx-1 >= 0 && grid[vy][vx-1].valid
+         && vy+1 <= nvmvbs && grid[vy+1][vx].valid
+         && vx+1 <= nhmvbs && grid[vy][vx+1].valid) {
+          mvp->valid = od_ec_decode_bool_q15(&dec->ec, 16384);
+          if (mvp->valid) od_decode_mv(dec, mvp, mv_res, width, height);
+          if (mvp->valid) nvecs++;
+        }
+      }
+    }
+    printf("frame %lld: decoded %d level 4 mvs\n", dec->state.cur_time, nvecs);
+    }
     od_state_mc_predict(&dec->state, OD_FRAME_PREV);
   }
   frame_width = dec->state.frame_width;
