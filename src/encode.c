@@ -1144,8 +1144,6 @@ int daala_encode_img_in(daala_enc_ctx *enc, od_img *img, int duration) {
     int mv_res;
     od_mv_grid_pt *mvp;
     od_mv_grid_pt **grid;
-    OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
-     OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_MOTION_VECTORS);
     nhmvbs = (enc->state.nhmbs + 1) << 2;
     nvmvbs = (enc->state.nvmbs + 1) << 2;
     mvimg = enc->state.io_imgs + OD_FRAME_REC;
@@ -1156,22 +1154,32 @@ int daala_encode_img_in(daala_enc_ctx *enc, od_img *img, int duration) {
     height = (mvimg->height + 32) << (3 - mv_res);
     grid = enc->state.mv_grid;
     /*Level 0.*/
+    OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
+     OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_MOTION_VECTORS0);
     for (vy = 0; vy <= nvmvbs; vy += 4) {
       for (vx = 0; vx <= nhmvbs; vx += 4) {
         mvp = &grid[vy][vx];
         od_encode_mv(enc, mvp, vx, vy, 0, mv_res, width, height);
       }
     }
+    OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
+     OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_UNKNOWN);
     /*Level 1.*/
     for (vy = 2; vy <= nvmvbs; vy += 4) {
       for (vx = 2; vx <= nhmvbs; vx += 4) {
         int p_invalid;
         p_invalid = od_mv_level1_prob(grid, vx, vy);
         mvp = &(grid[vy][vx]);
+        OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
+         OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_MOTION_FLAGS1);
         od_ec_encode_bool_q15(&enc->ec, mvp->valid, p_invalid);
+        OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
+         OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_MOTION_VECTORS1);
         if (mvp->valid) {
           od_encode_mv(enc, mvp, vx, vy, 1, mv_res, width, height);
         }
+        OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
+         OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_UNKNOWN);
       }
     }
     /*Level 2.*/
@@ -1182,13 +1190,19 @@ int daala_encode_img_in(daala_enc_ctx *enc, od_img *img, int duration) {
          && (vx-2 < 0 || grid[vy][vx-2].valid)
          && (vy+2 > nvmvbs || grid[vy+2][vx].valid)
          && (vx+2 > nhmvbs || grid[vy][vx+2].valid)) {
-          od_ec_encode_bool_q15(&enc->ec, mvp->valid, 13684);
+          OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
+           OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_MOTION_FLAGS2);
+          od_ec_encode_bool_q15(&enc->ec, mvp->valid, 10240);
+          OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
+           OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_MOTION_VECTORS2);
           if (mvp->valid) {
             od_encode_mv(enc, mvp, vx, vy, 2, mv_res, width, height);
           }
           else {
             OD_ASSERT(!mvp->valid);
           }
+          OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
+           OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_UNKNOWN);
         }
       }
     }
@@ -1198,13 +1212,19 @@ int daala_encode_img_in(daala_enc_ctx *enc, od_img *img, int duration) {
         mvp = &grid[vy][vx];
         if (grid[vy-1][vx-1].valid && grid[vy-1][vx+1].valid
          && grid[vy+1][vx+1].valid && grid[vy+1][vx-1].valid) {
+          OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
+           OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_MOTION_FLAGS3);
           od_ec_encode_bool_q15(&enc->ec, mvp->valid, 16384);
+          OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
+           OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_MOTION_VECTORS3);
           if (mvp->valid) {
             od_encode_mv(enc, mvp, vx, vy, 3, mv_res, width, height);
           }
           else {
             OD_ASSERT(!mvp->valid);
           }
+          OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
+           OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_UNKNOWN);
         }
       }
     }
@@ -1214,18 +1234,22 @@ int daala_encode_img_in(daala_enc_ctx *enc, od_img *img, int duration) {
         mvp = &grid[vy][vx];
         if (grid[vy-1][vx].valid && grid[vy][vx-1].valid
          && grid[vy+1][vx].valid && grid[vy][vx+1].valid) {
+          OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
+           OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_MOTION_FLAGS4);
           od_ec_encode_bool_q15(&enc->ec, mvp->valid, 16384);
+          OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
+           OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_MOTION_VECTORS4);
           if (mvp->valid) {
             od_encode_mv(enc, mvp, vx, vy, 4, mv_res, width, height);
           }
           else {
             OD_ASSERT(!mvp->valid);
           }
+          OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
+           OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_UNKNOWN);
         }
       }
     }
-    OD_ACCT_UPDATE(&enc->acct, od_ec_enc_tell_frac(&enc->ec),
-     OD_ACCT_CAT_TECHNIQUE, OD_ACCT_TECH_UNKNOWN);
   }
   {
     od_coeff *ctmp[OD_NPLANES_MAX];
