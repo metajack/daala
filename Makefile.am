@@ -539,6 +539,7 @@ endif # ENABLE_TOOLS
 if ENABLE_UNIT_TESTS
 noinst_PROGRAMS += \
 	src/tests/dcttest \
+	src/tests/test_32x32 \
 	src/tests/ectest \
 	src/tests/test_coef_coder \
 	src/tests/logging_test \
@@ -548,6 +549,7 @@ noinst_PROGRAMS += \
 
 TESTS = \
 	src/tests/dcttest \
+	src/tests/test_32x32 \
 	src/tests/ectest \
 	src/tests/test_coef_coder \
 	src/tests/logging_test \
@@ -555,10 +557,14 @@ TESTS = \
 	src/tests/test_filters \
 	src/tests/check_tests
 
-src_tests_dcttest_SOURCES = $(src_dct_SOURCES) src/filter.c src/internal.c
+src_tests_dcttest_SOURCES = $(src_dct_SOURCES) src/filter.c src/internal.c src/tf.c
 src_tests_dcttest_CFLAGS = $(OGG_CFLAGS) \
  -DOD_DCT_CHECK_OVERFLOW -DOD_DCT_TEST -DOD_ENABLE_ASSERTIONS
 src_tests_dcttest_LDADD = $(LIBM)
+
+src_tests_test_32x32_SOURCES = src/tests/test_32x32.c
+src_tests_test_32x32_CFLAGS = $(OGG_CFLAGS)
+src_tests_test_32x32_LDADD = $(LIBM)
 
 src_tests_ectest_SOURCES = src/tests/ectest.c
 src_tests_ectest_CFLAGS = $(OGG_CFLAGS)

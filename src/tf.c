@@ -107,7 +107,7 @@ void od_tf_up_hv_lp(od_coeff *dst, int dstride,
 }
 
 /*Increase horizontal and vertical frequency resolution of a 2x2 group of
-   blocks, combining them into a single block.*/
+   nxn blocks, combining them into a single 2nx2n block.*/
 void od_tf_up_hv(od_coeff *dst, int dstride,
  const od_coeff *src, int sstride, int n) {
   int x;
@@ -136,8 +136,8 @@ void od_tf_up_hv(od_coeff *dst, int dstride,
   }
 }
 
-/*Increase horizontal and vertical time resolution of a block, splitting it
-   into a 2x2 group of blocks.*/
+/*Increase horizontal and vertical time resolution of a nxn block,
+   splitting it into a 2x2 group of n/2xn/2 blocks.*/
 void od_tf_down_hv(od_coeff *dst, int dstride,
  const od_coeff *src, int sstride, int n) {
   int x;
