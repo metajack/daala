@@ -125,3 +125,5 @@ secret_key
 # accounting
 acct*.json
 ec-acct*.json
+# coefficient dumping
+coeffs/
