@@ -173,7 +173,7 @@ void pvq_encode(daala_enc_ctx *enc,
   int max_theta[PVQ_MAX_PARTITIONS];
   int qg[PVQ_MAX_PARTITIONS];
   int k[PVQ_MAX_PARTITIONS];
-  od_coeff y[16*16];
+  od_coeff y[OD_BSIZE_MAX*OD_BSIZE_MAX];
   int *exg;
   int *ext;
   int nb_bands;

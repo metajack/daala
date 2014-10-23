@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include "../dct.c"
 #include "../tf.c"
@@ -48,4 +49,5 @@ int main() {
     }
     printf("\n");
   }
+  return 0;
 }

@@ -306,8 +306,8 @@ static void od_block_decode(daala_dec_ctx *dec, od_mb_dec_ctx *ctx, int ln,
   od_coeff *tf;
   od_coeff *md;
   od_coeff *mc;
-  od_coeff pred[16*16];
-  od_coeff predt[16*16];
+  od_coeff pred[OD_BSIZE_MAX*OD_BSIZE_MAX];
+  od_coeff predt[OD_BSIZE_MAX*OD_BSIZE_MAX];
   int lossless;
   int quant;
   int dc_quant;
