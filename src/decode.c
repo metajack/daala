@@ -149,7 +149,7 @@ static void od_decode_compute_pred(daala_dec_ctx *dec, od_mb_dec_ctx *ctx, od_co
   int x;
   int y;
   int zzi;
-  OD_ASSERT(ln >= 0 && ln <= 2);
+  OD_ASSERT(ln >= 0 && ln <= 3);
   n = 1 << (ln + 2);
   n2 = n*n;
   xdec = dec->state.io_imgs[OD_FRAME_INPUT].planes[pli].xdec;
@@ -195,7 +195,9 @@ static void od_decode_compute_pred(daala_dec_ctx *dec, od_mb_dec_ctx *ctx, od_co
 #else
         mode = od_ec_decode_cdf_unscaled(&dec->ec, mode_cdf, OD_INTRA_NMODES);
 #endif
+#if !OD_DISABLE_INTRA || OD_DISABLE_HAAR_DC
         (*OD_INTRA_GET[ln])(pred, coeffs, strides, mode);
+#endif
 #if OD_DISABLE_INTRA
         OD_CLEAR(pred+1, n2-1);
 #endif
@@ -311,7 +313,7 @@ static void od_block_decode(daala_dec_ctx *dec, od_mb_dec_ctx *ctx, int ln,
   int lossless;
   int quant;
   int dc_quant;
-  OD_ASSERT(ln >= 0 && ln <= 2);
+  OD_ASSERT(ln >= 0 && ln <= 3);
   n = 1 << (ln + 2);
   lossless = (dec->quantizer[pli] == 0);
   bx <<= ln;
