@@ -41,7 +41,7 @@ noinst_HEADERS = \
 	src/x86/x86enc.h \
 	src/x86/x86int.h
 
-src_dct_SOURCES = src/dct.c
+src_dct_SOURCES = src/dct.c src/tf.c
 if ENABLE_X86ASM
 src_dct_SOURCES += src/x86/cpu.c
 if ENABLE_SSE2_INTRINSICS
@@ -82,7 +82,6 @@ src_libdaalabase_la_SOURCES = \
 	src/pvq_decoder.c \
 	src/state.c \
 	src/switch_table.c \
-	src/tf.c \
 	src/zigzag4.c \
 	src/zigzag8.c \
 	src/zigzag16.c \
@@ -334,7 +333,6 @@ tools_intra_stats_SOURCES = \
 	$(src_dct_SOURCES) \
 	src/intra.c \
 	src/switch_table.c \
-	src/tf.c \
 	src/internal.c \
 	src/intradata.c
 tools_intra_stats_CFLAGS = $(THEORA_CFLAGS) $(OGG_CFLAGS) $(PNG_CFLAGS) $(OPENMP_CFLAGS)
@@ -369,8 +367,7 @@ tools_intra_pred_SOURCES = \
 	src/intra.c \
 	src/intradata.c \
 	src/internal.c \
-	src/switch_table.c \
-	src/tf.c
+	src/switch_table.c
 tools_intra_pred_CFLAGS = $(OGG_CFLAGS) $(PNG_CFLAGS) $(OPENMP_CFLAGS)
 tools_intra_pred_LDADD = $(THEORA_LIBS) $(OGG_LIBS) $(PNG_LIBS) $(LIBM)
 
@@ -401,7 +398,6 @@ tools_intra_trace_SOURCES = \
 	$(src_dct_SOURCES) \
 	src/intra.c \
 	src/switch_table.c \
-	src/tf.c \
 	src/internal.c \
 	src/intradata.c
 tools_intra_trace_CFLAGS = $(OGG_CFLAGS) $(PNG_CFLAGS) $(OPENMP_CFLAGS)
@@ -482,7 +478,6 @@ tools_init_intra_xform_SOURCES = \
 	src/filter.c \
 	$(src_dct_SOURCES) \
 	src/intra.c \
-	src/tf.c \
 	src/internal.c \
 	src/intradata.c
 tools_init_intra_xform_CFLAGS = $(THEORA_CFLAGS) $(OGG_CFLAGS) $(PNG_CFLAGS)
@@ -558,7 +553,7 @@ TESTS = \
 	src/tests/test_filters \
 	src/tests/check_tests
 
-src_tests_dcttest_SOURCES = $(src_dct_SOURCES) src/filter.c src/internal.c src/tf.c
+src_tests_dcttest_SOURCES = $(src_dct_SOURCES) src/filter.c src/internal.c
 src_tests_dcttest_CFLAGS = $(OGG_CFLAGS) \
  -DOD_DCT_CHECK_OVERFLOW -DOD_DCT_TEST -DOD_ENABLE_ASSERTIONS
 src_tests_dcttest_LDADD = $(LIBM)
