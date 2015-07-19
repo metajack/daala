@@ -1441,6 +1441,41 @@ void od_apply_postfilter_frame_sbs(od_coeff *c0, int stride, int nhsb,
   }
 }
 
+/*Smooths a block using the constrained lowpass filter from Thor
+  (https://tools.ietf.org/html/draft-fuldseth-netvc-thor-00#section-8.2).*/
+void od_clpf(od_coeff *y, int ystride, od_coeff *x, int xstride, int ln,
+ int sbx, int sby, int nhsb, int nvsb) {
+  int i;
+  int j;
+  int n;
+  int delta;
+  int sum;
+  int sign;
+  od_coeff A;
+  od_coeff B;
+  od_coeff C;
+  od_coeff D;
+  od_coeff X;
+  n = 1 << ln;
+  for (i = 0; i < n; i++) {
+    for (j = 0; j < n; j++) {
+      X = x[i*xstride + j];
+      if (sby > 0 || i > 0) A = x[(i-1)*xstride + j];
+      else A = X;
+      if (sbx > 0 || j > 0) B = x[i*xstride + (j-1)];
+      else B = X;
+      if (sbx < nhsb - 1 || j < n - 1) C = x[i*xstride + (j+1)];
+      else C = X;
+      if (sby < nvsb - 1 || i < n - 1) D = x[(i+1)*xstride + j];
+      else D = X;
+      sum = A + B + C + D - 4*X;
+      sign = sum < 0 ? -1 : 1;
+      delta = sign * OD_MINI(1 << OD_COEFF_SHIFT, (abs(sum)+2) >> 2);
+      y[i*ystride + j] = X + delta;
+    }
+  }
+}
+
 /** Smoothes a block using bilinear interpolation from its four corners.
  *  The interpolation is applied using a weight that depends on the amount
  *  amount of distortion it causes to the signal compared to the quantization
