@@ -223,6 +223,7 @@ struct od_state{
   unsigned char pvq_qm_q4[OD_NPLANES_MAX][OD_QM_SIZE];
   /* Holds a TF'd copy of the transform coefficients in 4x4 blocks. */
   unsigned char *clpf_flags;
+  unsigned char *skip_flags;
 };
 
 int od_state_init(od_state *_state, const daala_info *_info);

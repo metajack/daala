@@ -1266,7 +1266,7 @@ static int od_encode_recursive(daala_enc_ctx *enc, od_mb_enc_ctx *ctx,
         for (j = 0; j < n; j++) ctx->mc[bo + i*w + j] = mc_orig[n*i + j];
       }
     }
-    return skip_block;
+    return skip_block && rdo_only;
   }
 }
 
@@ -1525,6 +1525,7 @@ static void od_encode_coefficients(daala_enc_ctx *enc, od_mb_enc_ctx *mbctx,
   int frame_height;
   int nhsb;
   int nvsb;
+  int skipped;
   od_state *state = &enc->state;
   nplanes = state->info.nplanes;
   if (rdo_only) nplanes = 1;
@@ -1614,8 +1615,12 @@ static void od_encode_coefficients(daala_enc_ctx *enc, od_mb_enc_ctx *mbctx,
             }
           }
         }
-        od_encode_recursive(enc, mbctx, pli, sbx, sby, OD_NBSIZES - 1, xdec,
-         ydec, rdo_only, hgrad, vgrad);
+        /*JAM:save value here for whether block is skipped. 1=skipped, 0=notskipped*/
+        skipped = od_encode_recursive(enc, mbctx, pli, sbx, sby,
+         OD_NBSIZES - 1, xdec, ydec, rdo_only, hgrad, vgrad);
+        if (pli == 0) {
+          enc->state.skip_flags[sby*nhsb + sbx] = skipped;
+        }
       }
     }
   }
@@ -1676,6 +1681,11 @@ static void od_encode_coefficients(daala_enc_ctx *enc, od_mb_enc_ctx *mbctx,
         int q2;
         double filtered_rate;
         double unfiltered_rate;
+        if (state->skip_flags[sby*nhsb + sbx]) {
+          state->clpf_flags[sby*nhsb + sbx] = 0;
+          /* printf("skipping (%d,%d)\n", sbx, sby); */
+          continue;
+        }
         pli = 0;
         xdec = state->io_imgs[OD_FRAME_INPUT].planes[pli].xdec;
         ydec = state->io_imgs[OD_FRAME_INPUT].planes[pli].ydec;
@@ -1701,7 +1711,6 @@ static void od_encode_coefficients(daala_enc_ctx *enc, od_mb_enc_ctx *mbctx,
             filtered_error += (r - p)*(double)(r - p);
             o = output[y*w + x];
             unfiltered_error += (r - o)*(double)(r - o);
-            /*printf("pre-r=%u r=%d p=%d o=%d r-p=%d r-o=%d ferr=%0.4f uerr=%0.4f\n", (unsigned int)input[y*ystride + x], r, p, o, r-p, r-o, filtered_error, unfiltered_error);*/
           }
         }
         up = 0;
@@ -1718,8 +1727,10 @@ static void od_encode_coefficients(daala_enc_ctx *enc, od_mb_enc_ctx *mbctx,
         q2 = enc->quantizer[0] * enc->quantizer[0];
         filtered = (filtered_error + 0.1*q2*filtered_rate) <
          (unfiltered_error + 0.1*q2*unfiltered_rate);
+        /*filtered = 0;*/
         total_filtered += filtered;
         state->clpf_flags[sby*nhsb + sbx] = filtered;
+        /* printf("sb=(%d,%d) filtered=%d\n", sbx, sby, filtered); */
         /* printf("sb=(%d,%d) q2=%d frate=%0.4f urate=%0.4f ferr=%0.4f uerr=%0.4f filtered=%d\n", */
         /*   sbx, sby, q2, filtered_rate, unfiltered_rate, filtered_error, */
         /*   unfiltered_error, filtered); */

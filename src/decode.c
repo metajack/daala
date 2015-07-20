@@ -626,6 +626,11 @@ static void od_decode_recursive(daala_dec_ctx *dec, od_mb_dec_ctx *ctx, int pli,
     skip = od_decode_cdf_adapt(&dec->ec,
      dec->state.adapt.skip_cdf[2*bsi + (pli != 0)], 5,
      dec->state.adapt.skip_increment);
+    /*JAM: save skip value here. 2=skipped*/
+    if (bsi == OD_NBSIZES - 1) {
+      /* printf("bx=%d by=%d bsi=%d skip=%d\n", bx, by, bsi, skip); */
+      dec->state.skip_flags[by*dec->state.nhsb + bx] = skip == 2;
+    }
     if (skip < 4) obs = bsi;
     else obs = -1;
   }
@@ -868,6 +873,11 @@ static void od_decode_coefficients(od_dec_ctx *dec, od_mb_dec_ctx *mbctx) {
       int c;
       int up;
       int left;
+      if (state->skip_flags[sby*nhsb + sbx]) {
+        state->clpf_flags[sby*nhsb + sbx] = 0;
+        /* printf("skipping (%d,%d)\n", sbx, sby); */
+        continue;
+      }
       up = 0;
       if (sby > 0) {
         up = state->clpf_flags[(sby-1)*nhsb + sbx];
@@ -880,6 +890,8 @@ static void od_decode_coefficients(od_dec_ctx *dec, od_mb_dec_ctx *mbctx) {
       filtered = od_decode_cdf_adapt(&dec->ec, state->adapt.clpf_cdf[c], 2,
        state->adapt.clpf_increment);
       state->clpf_flags[sby*nhsb + sbx] = filtered;
+      /* printf("sb=(%d,%d) filtered=%d\n", */
+      /*  sbx, sby, filtered); */
       if (filtered) {
         for (pli = 0; pli < nplanes; pli++) {
           od_coeff buf[OD_BSIZE_MAX*OD_BSIZE_MAX];

@@ -364,6 +364,7 @@ static int od_state_init_impl(od_state *state, const daala_info *info) {
   state->dump_files = 0;
 #endif
   state->clpf_flags = (unsigned char *)malloc(state->nhsb * state->nvsb);
+  state->skip_flags = (unsigned char *)malloc(state->nhsb * state->nvsb);
   return OD_SUCCESS;
 }
 
