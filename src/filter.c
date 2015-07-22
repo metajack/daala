@@ -1470,7 +1470,12 @@ void od_clpf(od_coeff *y, int ystride, od_coeff *x, int xstride, int ln,
       else D = X;
       sum = A + B + C + D - 4*X;
       sign = sum < 0 ? -1 : 1;
-      delta = sign * OD_MINI(1 << OD_COEFF_SHIFT, (abs(sum)+2) >> 2);
+      if (abs(sum) > (16 << OD_COEFF_SHIFT)) {
+        delta = 0;
+      }
+      else {
+        delta = sign * OD_MINI(1 << OD_COEFF_SHIFT, (abs(sum)+2) >> 2);
+      }
       y[i*ystride + j] = X + delta;
     }
   }
